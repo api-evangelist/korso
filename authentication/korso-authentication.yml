@@ -1,0 +1,86 @@
+generated: '2026-07-19'
+method: searched
+source: https://korsoai.com/docs/guides/authentication
+docs: https://korsoai.com/docs/guides/authentication
+summary:
+  types:
+  - http
+  http_schemes:
+  - bearer
+  oauth2_flows: []
+  api_key_in: []
+  note: >-
+    No OpenAPI is published, so this profile is captured from the provider's authentication guide rather
+    than derived from securitySchemes. Shepherd has no OAuth scope surface - both credential kinds are
+    opaque bearer tokens - so no scopes/ artifact is emitted.
+schemes:
+- name: SHEPHERD_TOKEN
+  type: http
+  scheme: bearer
+  deployment: korso-hosted
+  scope: account
+  token_prefix: shp_
+  issued_via: >-
+    Sign in to the Korso dashboard with Google or GitHub, open the Connect Agent panel, optionally name
+    the token, then click Generate token.
+  shown_once: true
+  revocable: true
+  management: >-
+    Tokens can be named, listed with created and last-used timestamps, and individually revoked from the
+    Connect Agent panel at any time.
+  description: >-
+    Account-scoped token that works across every workspace the account belongs to - there is no per-repo
+    or per-workspace re-tokening. Wins if TEAM_TOKEN is also set.
+  sources:
+  - https://korsoai.com/docs/guides/authentication
+- name: TEAM_TOKEN
+  type: http
+  scheme: bearer
+  deployment: self-hosted
+  scope: workspace
+  issued_via: Configured on the hub by whoever operates it and distributed to the team.
+  shown_once: false
+  revocable: rotate on the hub
+  description: >-
+    A single shared, workspace-wide secret. Not scoped per agent or per person - anyone holding it has
+    full authority over that hub's one workspace. Documented as a shared password, not an identity.
+  warning: >-
+    Never commit it; distribute through a secret manager and rotate it if a teammate with access leaves.
+  sources:
+  - https://korsoai.com/docs/guides/authentication
+- name: x-internal-token + x-account-id
+  type: http
+  scheme: custom-header
+  deployment: korso-hosted (internal)
+  description: >-
+    The hosted deployment mode authenticates the front-end/BFF to the hub with an internal token plus a
+    trusted x-account-id header, then mints per-agent tokens. Documented in the Shepherd AGENTS.md and
+    implemented in packages/hub/src/tenant.ts. Not a public developer-facing credential.
+  sources:
+  - https://github.com/Korso-AI/Shepherd/blob/main/AGENTS.md
+transport:
+  mechanism: environment variables on the stdio MCP server process
+  required: at least one of SHEPHERD_TOKEN or TEAM_TOKEN
+  failure_mode: >-
+    The @korso/shepherd MCP server fails immediately at startup with a clear error when neither variable
+    is set.
+  companion_variables:
+  - name: HUB_URL
+    description: Base URL of the Shepherd hub.
+  - name: WORKSPACE
+    description: >-
+      Self-host only; must exactly match the hub's configured workspace. Ignored on the hosted path.
+identity_model:
+  account: >-
+    On a hosted hub, whatever the user signed in with (Google or GitHub). On self-host, effectively
+    whoever holds the TEAM_TOKEN.
+  workspace: A coordination boundary; every coordination table carries a NOT NULL workspace_id.
+  repo: >-
+    Opted into a workspace by a committed .shepherd marker file naming the workspace slug - never a
+    token.
+  membership: >-
+    A repo can only be linked to a workspace the account is a member of; invalid slugs are rejected.
+  token_storage: Hashed shp_ API tokens; the raw value is shown once and cannot be retrieved again.
+identity_providers:
+- Google
+- GitHub
