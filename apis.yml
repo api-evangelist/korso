@@ -1,22 +1,112 @@
 aid: korso
 name: Korso
-description: Korso is a company surfaced as a portfolio company of y-combinator and added to the API Evangelist
-  network as a stub for enrichment. This profile is a lead awaiting the enrichment pipeline.
+description: 'Korso is a Los Angeles based company (Y Combinator Spring 2026) building tooling for
+  the next generation of software. Its flagship open source product, Shepherd, is a coordination layer
+  for AI coding agents: a Fastify + Postgres hub, a published stdio Model Context Protocol server
+  (@korso/shepherd on npm), a shared zod wire contract, and a React dashboard (@korso/shepherd-ui).
+  Shepherd lets a fleet of agents working across sessions, worktrees, and team members claim files,
+  release claims, broadcast announcements, and refresh a shared workspace landscape so they stop
+  producing merge conflicts and overwriting each other. The MCP surface exposes seven documented tools
+  (work, done, announce, sync, link, unlink, decline). Korso also runs a beta Trading API over its own
+  quantitative trading desk and Korso Research, an AI-native research workspace.'
+accessModel:
+  pricing: unknown
+  onboarding: self-serve
+  trial: false
+  try_now: false
+  public: false
+  label: Self-serve signup
+  confidence: medium
+  source:
+  - authentication
+  generated: '2026-07-22'
+  method: derived
+image: https://korsoai.com/docs/favicon.svg
 url: https://raw.githubusercontent.com/api-evangelist/korso/refs/heads/main/apis.yml
 x-type: company
 x-source: vc-portfolio
 x-backed-by:
 - y-combinator
-x-tier: stub
-x-tier-reason: portfolio-lead
+x-tier: profiled
+x-tier-reason: enrichment-pipeline
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-17'
+modified: '2026-07-19'
 tags:
 - Company
+- Artificial Intelligence
+- Agents
+- Model Context Protocol
+- Developer Tools
+- Open Source
+- Agent Coordination
+- Y Combinator
 apis: []
+common:
+- type: MCPServer
+  name: Shepherd MCP server
+  url: mcp/korso-mcp.yml
+- type: Packages
+  url: packages/korso-packages.yml
+- type: SDKs
+  url: packages/korso-packages.yml
+- type: Authentication
+  url: authentication/korso-authentication.yml
+- type: Conventions
+  url: conventions/korso-conventions.yml
+- type: DataModel
+  url: data-model/korso-data-model.yml
+- type: Components
+  url: components/korso-components.yml
+- type: Conformance
+  url: conformance/korso-conformance.yml
+- type: Lifecycle
+  url: lifecycle/korso-lifecycle.yml
+- type: ChangeLog
+  url: changelog/korso-changelog.yml
+- type: ChangeLog
+  name: Shepherd CHANGELOG
+  url: https://github.com/Korso-AI/Shepherd/blob/main/CHANGELOG.md
+- type: LLMsTxt
+  url: llms/korso-llms.txt
+- type: AgentSkill
+  url: skills/_index.yml
+- type: VulnerabilityDisclosure
+  url: security/korso-vulnerability-disclosure.yml
+- type: Security
+  name: Shepherd security policy
+  url: https://github.com/Korso-AI/Shepherd/blob/main/SECURITY.md
+- type: DomainSecurity
+  url: security/korso-domain-security.yml
+- type: Website
+  url: https://korsoai.com/
+- type: DeveloperPortal
+  url: https://korsoai.com/docs
+- type: Documentation
+  url: https://korsoai.com/docs
+- type: APIReference
+  url: https://korsoai.com/docs/mcp-tools/work
+- type: GettingStarted
+  url: https://korsoai.com/docs/quickstart
+- type: Support
+  url: mailto:support@korsoai.com
+- type: GitHubOrganization
+  url: https://github.com/Korso-AI
+- type: SourceCode
+  url: https://github.com/Korso-AI/Shepherd
+- type: SignUp
+  url: https://korsoai.com/login
+- type: TermsOfService
+  url: https://korsoai.com/terms
+- type: PrivacyPolicy
+  url: https://korsoai.com/privacy
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+x-enrichment:
+  date: '2026-07-19'
+  status: backfilled
+  pass: local-v1
+  note: backfilled from .gitignore signal + verified work evidence
