@@ -1,0 +1,45 @@
+generated: '2026-07-19'
+method: searched
+source: https://www.npmjs.com/package/@korso/shepherd-ui
+note: >-
+  Korso publishes one embeddable client-side component library. It is distinct from the MCP server in
+  packages/ - @korso/shepherd-ui is a React library consumers mount in their own application, published
+  deliberately as auth-agnostic so the host app owns identity.
+families:
+- name: Shepherd wallboard
+  library: '@korso/shepherd-ui'
+  registry: npm
+  version: 0.20.1
+  url: https://www.npmjs.com/package/@korso/shepherd-ui
+  install: npm install @korso/shepherd-ui
+  license: AGPL-3.0-only
+  framework: React
+  build: Vite
+  official: true
+  description: >-
+    Auth-agnostic React UI library for the Shepherd wallboard. Renders live coordination state (active
+    claims, presence, announcements) and issues operator actions.
+  exports:
+  - name: Dashboard
+    kind: component
+    description: The wallboard surface rendering workspace coordination state.
+  - name: client
+    kind: module
+    description: Talks to the hub's read and operate endpoints.
+  - name: providers
+    kind: component
+    description: Context providers the host application wraps the dashboard in.
+  design_constraint: >-
+    Holds no auth or identity and never decides who the user is - that belongs to the layer in front
+    (the BFF when hosted, the bearer hook when self-hosted). This is an explicit architectural boundary
+    stated in the repository AGENTS.md.
+  source_code: https://github.com/Korso-AI/Shepherd/tree/main/packages/ui
+hosted_surfaces:
+- name: Korso dashboard
+  url: https://korsoai.com/login
+  description: >-
+    The Korso-hosted console. Sign in with Google or GitHub; the Connect Agent panel generates, names,
+    lists, and revokes account tokens and emits a ready-to-paste MCP install command pre-filled with
+    HUB_URL and the new token.
+  embeddable: false
+web_components: []

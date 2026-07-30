@@ -1,0 +1,171 @@
+generated: '2026-07-19'
+method: searched
+source: https://korsoai.com/docs/guides/authentication
+docs: https://korsoai.com/docs/guides/authentication
+note: >-
+  Derived from the Shepherd documentation (authentication and workspaces guide, MCP tool reference) and
+  the repository AGENTS.md rather than from an OpenAPI document - Korso publishes no spec. The wire
+  contract itself lives as zod schemas in the private @shepherd/shared package.
+entities:
+- name: Account
+  description: >-
+    You, or your team on a self-hosted deployment. On a hosted hub the account is whatever the user
+    signed in with (Google or GitHub). On self-host the account is effectively whoever holds the
+    TEAM_TOKEN.
+  relationships:
+  - type: has_many
+    target: Token
+    via: account
+  - type: has_many
+    target: Workspace
+    via: membership
+- name: Workspace
+  description: >-
+    A coordination boundary. Every coordination table in the hub carries a NOT NULL workspace_id and
+    every query is scoped by the resolved workspace.
+  identifier: slug
+  identifier_example: acme-corp
+  relationships:
+  - type: has_many
+    target: Repo
+    via: workspace
+  - type: has_many
+    target: Agent
+    via: workspace
+  - type: has_many
+    target: WorkItem
+    via: workspace_id
+  - type: has_many
+    target: Announcement
+    via: workspace_id
+  - type: has_many
+    target: Member
+    via: membership
+- name: Member
+  description: A human account belonging to a workspace; addressable by display name, GitHub login, or email.
+  relationships:
+  - type: belongs_to
+    target: Workspace
+  - type: belongs_to
+    target: Account
+- name: Repo
+  description: >-
+    A repository opted into coordination by a committed .shepherd marker file at the repo root naming
+    the workspace slug (never a token). Can also carry a local, uncommitted decline.
+  marker_file: .shepherd
+  states:
+  - unlinked
+  - linked
+  - declined (local-only, per user)
+  relationships:
+  - type: belongs_to
+    target: Workspace
+    via: workspace
+  - type: has_many
+    target: Agent
+    via: repo
+- name: Agent
+  description: >-
+    A live MCP client session in a repo. Identified by a landscape name with a numeric suffix (e.g.
+    alex-rivera-2) because several agents can share one handle.
+  identifier: landscape name (handle + numeric suffix)
+  relationships:
+  - type: belongs_to
+    target: Repo
+  - type: has_many
+    target: WorkItem
+    via: claimant
+  - type: has_one
+    target: Session
+  - type: has_one
+    target: Mailbox
+- name: Session
+  description: >-
+    A coordination session established on join. Carries presence via heartbeat and goes stale after
+    roughly 2 minutes without one. Torn down immediately by unlink.
+  relationships:
+  - type: belongs_to
+    target: Agent
+- name: WorkItem
+  description: >-
+    An advisory, time-bound claim over a set of path globs, created or refreshed by the work tool and
+    released by done. Expires by TTL when done is never called.
+  identifier: workItemId
+  identifier_type: UUID
+  fields:
+  - name: intent
+    type: string
+    max: 2048 characters
+  - name: pathGlobs
+    type: string[]
+    max: 64 entries
+  - name: ttlSeconds
+    type: integer
+  relationships:
+  - type: belongs_to
+    target: Agent
+    via: claimant
+  - type: belongs_to
+    target: Workspace
+    via: workspace_id
+- name: Announcement
+  description: >-
+    A broadcast or directed coordination message. Best-effort delivery, bounded by a 48-hour freshness
+    window, with age stamps on every delivery path.
+  identifier: announcementId
+  identifier_type: number
+  fields:
+  - name: body
+    type: string
+    max: 8192 characters
+  - name: target
+    type: string or null
+    max: 256 characters
+    description: null broadcasts; otherwise a live agent name, a workspace member name, or "admin".
+  relationships:
+  - type: belongs_to
+    target: Workspace
+    via: workspace_id
+  - type: belongs_to
+    target: Agent
+    via: sender
+  - type: has_one
+    target: Agent
+    via: target
+- name: Mailbox
+  description: >-
+    A per-session announcement mailbox owned by each MCP server process, paired to its session by
+    process ancestry so co-located agents cannot consume each other's messages.
+  since: '@korso/shepherd 0.10.0'
+  relationships:
+  - type: belongs_to
+    target: Session
+- name: Token
+  description: >-
+    A bearer credential. Hosted tokens are account-scoped, prefixed shp_, stored hashed, shown once, and
+    individually revocable with created and last-used timestamps. Self-hosted uses a single shared
+    workspace-wide TEAM_TOKEN.
+  identifier_prefix: shp_
+  kinds:
+  - SHEPHERD_TOKEN (account-scoped, hosted)
+  - TEAM_TOKEN (workspace-wide shared secret, self-hosted)
+  relationships:
+  - type: belongs_to
+    target: Account
+- name: Landscape
+  description: >-
+    The aggregate view returned by sync and work - active claims, your own active claims, recent
+    announcements, and presence information for the current workspace.
+  materialized: true
+  relationships:
+  - type: has_many
+    target: WorkItem
+  - type: has_many
+    target: Announcement
+  - type: has_many
+    target: Agent
+id_prefixes:
+- prefix: shp_
+  entity: Token
+  scope: hosted account API tokens
+render: null

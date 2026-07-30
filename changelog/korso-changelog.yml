@@ -1,0 +1,87 @@
+generated: '2026-07-19'
+method: searched
+source: https://github.com/Korso-AI/Shepherd/blob/main/CHANGELOG.md
+url: https://github.com/Korso-AI/Shepherd/blob/main/CHANGELOG.md
+format: keep-a-changelog
+format_url: https://keepachangelog.com/
+versioning:
+  scheme: semver
+  per_package: true
+  note: >-
+    Only the published packages are versioned here. The hub (@shepherd/hub) and shared contract
+    (@shepherd/shared) are private monorepo packages and are not versioned independently on npm.
+current:
+  '@korso/shepherd': 0.11.2
+  '@korso/shepherd-ui': 0.20.1
+note: >-
+  The CHANGELOG in the repository last records @korso/shepherd-ui 0.17.0, while npm currently publishes
+  0.20.1 - the UI package ships ahead of its changelog entries.
+entries:
+- package: '@korso/shepherd'
+  version: 0.11.2
+  date: '2026-07-12'
+  breaking: false
+  fixed:
+  - Codex hook setup now installs UserPromptSubmit, SessionStart, and wildcard PreToolUse handlers, and
+    safely migrates Shepherd-owned legacy configs.
+- package: '@korso/shepherd'
+  version: 0.11.1
+  date: '2026-07-10'
+  breaking: false
+  fixed:
+  - >-
+    A transient hub fault at startup (unreachable hub or a 5xx on /join) no longer leaves the session
+    uncoordinated until a restart. The coordination gate lazily re-joins on the next tool call, with
+    concurrent calls sharing a single retry. Permanent rejections (bad token, disallowed workspace)
+    still fail fast and are never retried.
+- package: '@korso/shepherd'
+  version: 0.11.0
+  date: '2026-07-09'
+  breaking: false
+  added:
+  - >-
+    Update nudge. The hub advertises the latest published client version on join (plus an optional
+    MIN_CLIENT_VERSION floor); an out-of-date client appends a one-line note to the first coordination
+    tool result of the session. At most once per session with a ~24-hour per-machine cooldown; clients
+    below the minimum supported version are warned every session.
+- package: '@korso/shepherd'
+  version: 0.10.0
+  date: '2026-07-09'
+  breaking: false
+  added:
+  - >-
+    Per-session announcement mailboxes. Heartbeat out-of-band delivery targets a mailbox owned by each
+    MCP server process, paired to its session by process ancestry, so two agents in the same directory
+    can no longer consume each other's messages.
+  fixed:
+  - Announcement age stamps on every delivery path plus a 48-hour delivery freshness bound.
+  - An agent name is not recycled to a new joiner while announcements sent by or targeted at it are
+    still within the delivery window.
+  - A hot link of the already-active workspace reuses the live session instead of re-joining under a
+    fresh identity.
+  - On Windows, the auto-installed Claude Code hook command is written with forward slashes.
+- package: '@korso/shepherd-ui'
+  version: 0.17.0
+  date: '2026-07-07'
+  breaking: false
+  fixed:
+  - Sync SHEPHERD_UI_VERSION with package version for feedback metadata.
+- package: '@korso/shepherd'
+  version: 0.9.1
+  date: '2026-07-07'
+  breaking: false
+  fixed:
+  - >-
+    Pi's MCP adapter discards the initialize instructions field, so Pi agents had the coordination tools
+    wired up but no guidance. The Pi extension now injects the standing procedure into the agent's
+    system prompt on every turn, scoped to repos with a .shepherd marker.
+- package: '@korso/shepherd'
+  version: 0.9.0
+  date: '2026-07-07'
+  breaking: false
+  milestone: initial public release
+  added:
+  - Initial public npm release of the Shepherd MCP server (shepherd-mcp bin).
+  - 'Advisory coordination tools: work, done, announce, sync.'
+  - 'Repo lifecycle tools: link, unlink, decline.'
+  - Auto hook installation for Claude Code, Codex, Cursor, and Pi (opt-out available).

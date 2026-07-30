@@ -1,0 +1,76 @@
+generated: '2026-07-19'
+method: searched
+source: https://github.com/Korso-AI/Shepherd
+versioning:
+  scheme: semver
+  per_package: true
+  current:
+    '@korso/shepherd': 0.11.2
+    '@korso/shepherd-ui': 0.20.1
+  stability: >-
+    Pre-1.0 and under active development. Shepherd is presented on korsoai.com as Beta and the Korso-AI
+    GitHub organization publishes a single public repository.
+  public_contract: >-
+    The @korso/shepherd MCP tool surface and bin entries (shepherd-mcp, shepherd-inbox-hook) are treated
+    as a public contract; changes to them ship as a release rather than a refactor.
+  docs: https://github.com/Korso-AI/Shepherd/blob/main/CHANGELOG.md
+changelog:
+  url: https://github.com/Korso-AI/Shepherd/blob/main/CHANGELOG.md
+  format: keep-a-changelog
+  artifact: changelog/korso-changelog.yml
+supported_versions:
+  policy: >-
+    Security fixes are applied to the latest release on the main branch. Users are advised to always run
+    the most recent published version of @korso/shepherd and @korso/shepherd-ui.
+  source: https://github.com/Korso-AI/Shepherd/blob/main/SECURITY.md
+client_version_floor:
+  mechanism: MIN_CLIENT_VERSION
+  behavior: >-
+    The hub advertises the latest published client version on join. Out-of-date clients receive a
+    one-line update nudge on the first coordination tool result of a session (once per session, ~24-hour
+    per-machine cooldown). Clients below the configured minimum supported version are warned every
+    session.
+  since: '@korso/shepherd 0.11.0'
+deprecation:
+  policy_url: null
+  policy_published: false
+  sunset_header: false
+  practice: >-
+    Deprecated inputs are kept working for older clients and labelled deprecated in the tool reference -
+    the announce tool documents targetAgentName and toAdmin as deprecated aliases for target, with the
+    guidance to prefer target and not combine it with either. This is an observed practice, not a
+    published deprecation policy with removal timelines, so no Deprecation pointer is emitted.
+  deprecated_inputs:
+  - tool: announce
+    input: targetAgentName
+    replacement: target
+    docs: https://korsoai.com/docs/mcp-tools/announce
+  - tool: announce
+    input: toAdmin
+    replacement: target
+    docs: https://korsoai.com/docs/mcp-tools/announce
+sla:
+  url: null
+  uptime_target: null
+  published: false
+status_page:
+  url: null
+  published: false
+  probed:
+  - url: https://status.korsoai.com/
+    status: no DNS
+  - url: https://korsoai.com/status
+    status: 200 but resolves to the site's sign-in catch-all shell, not a status page
+  note: >-
+    No status page found. korsoai.com is a single-page app whose catch-all returns HTTP 200 with a
+    "Sign in - Korso Console" shell for any unknown path, so a bare 200 is not evidence of a page. No
+    StatusPage pointer is emitted.
+deployment_modes:
+- mode: korso-hosted
+  description: Multi-tenant hosted hub; sign in with Google or GitHub, account-scoped shp_ tokens.
+- mode: self-hosted
+  description: Run your own Fastify + Postgres hub with a shared TEAM_TOKEN and one configured workspace.
+license:
+  id: AGPL-3.0-only
+  name: GNU Affero General Public License v3.0 only
+  url: https://github.com/Korso-AI/Shepherd/blob/main/LICENSE

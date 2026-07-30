@@ -1,0 +1,50 @@
+generated: '2026-07-19'
+method: generated
+source: https://korsoai.com/docs
+note: >-
+  Skills are grounded in the seven real, documented @korso/shepherd MCP tool names (work, done,
+  announce, sync, link, unlink, decline) taken verbatim from the Korso MCP tool reference. Korso
+  publishes no OpenAPI, so the MCP tool surface is the operation surface. The provider's own
+  AGENTS.md is saved verbatim alongside the generated skills.
+skills:
+- file: korso-shepherd-agents.md
+  name: Shepherd engineering charter (provider-published AGENTS.md)
+  method: searched
+  source: https://github.com/Korso-AI/Shepherd/blob/main/AGENTS.md
+  api: https://github.com/Korso-AI/Shepherd
+  description: >-
+    Korso's own canonical agent context for the Shepherd repository - architecture and module
+    boundaries, the one command (npm run check), code style, auth invariants, and Definition of Done.
+    Saved verbatim.
+- file: korso-coordinate-agent-work.md
+  name: Coordinate agent work in a shared Shepherd workspace
+  method: generated
+  api: mcp/korso-mcp.yml
+  operations:
+  - sync
+  - work
+  - done
+  description: >-
+    Claim a file area before editing, keep the claim alive, and release it when done so multiple agents
+    stop producing merge conflicts.
+- file: korso-announce-to-workspace.md
+  name: Announce and message across a Shepherd workspace
+  method: generated
+  api: mcp/korso-mcp.yml
+  operations:
+  - announce
+  - sync
+  description: >-
+    Broadcast an awareness message to the workspace or direct one at an agent, a human teammate, or the
+    operator surface, and pick up waiting messages.
+- file: korso-opt-repo-in-out.md
+  name: Opt a repository into or out of Shepherd coordination
+  method: generated
+  api: mcp/korso-mcp.yml
+  operations:
+  - link
+  - unlink
+  - decline
+  description: >-
+    Link a repo to a workspace with a committed marker, unlink it repo-wide, or decline coordination
+    locally without writing a marker.

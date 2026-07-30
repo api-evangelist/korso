@@ -1,0 +1,119 @@
+generated: '2026-07-19'
+method: searched
+source: https://korsoai.com/docs
+docs: https://korsoai.com/docs
+scope: >-
+  Cross-cutting semantics of the Shepherd MCP tool surface (@korso/shepherd). Shepherd publishes no REST
+  OpenAPI, so these conventions are captured from the MCP tool reference and the authentication guide
+  rather than derived from a spec.
+surface:
+  protocol: Model Context Protocol
+  transport: stdio
+  wire_contract: zod schemas in @shepherd/shared (single source of truth for both ends of the wire)
+authentication:
+  style: bearer token via environment variable
+  detail: authentication/korso-authentication.yml
+idempotency:
+  supported: false
+  note: >-
+    Shepherd documents no idempotency key, no request-replay contract, and no dedupe header. Claims are
+    identified after the fact by a server-issued workItemId rather than by a client-supplied key, so no
+    Idempotency pointer is emitted for this provider.
+  related_semantics:
+  - >-
+    work is documented as create-or-refresh - calling it refreshes the agent's presence and renews
+    active claims - which is convergent but is not an idempotency-key contract.
+  - A hot link of the already-active workspace reuses the live session instead of re-joining.
+  - done is safe to call even when the task ended without a code change.
+session_and_gating:
+  gated_tools:
+  - work
+  - done
+  - announce
+  - sync
+  ungated_tools:
+  - link
+  - unlink
+  - decline
+  rule: >-
+    Coordination tools require an existing coordination session; repo-lifecycle tools always run,
+    including in a repo that has never been linked.
+  join: >-
+    The coordination gate lazily re-joins on the next tool call after a transient hub fault, with
+    concurrent calls sharing a single retry. Permanent rejections fail fast and are never retried.
+leases_and_ttl:
+  model: advisory time-bound claims
+  claim_id: workItemId (UUID) returned by work
+  ttl_param: ttlSeconds on work; server default applies when omitted
+  renewal: sync and work both renew active claims without creating a new one
+  expiry: Claims expire by TTL if the agent never calls done; the workspace treats them as no longer active
+  release: done with the workItemId
+presence:
+  heartbeat: true
+  stale_threshold: ~2 minutes without a heartbeat
+  refreshed_by:
+  - work
+  - sync
+  teardown: unlink tears the session down immediately rather than waiting for staleness
+pagination:
+  supported: false
+  note: >-
+    sync returns the whole current workspace landscape (active claims, own claims, recent announcements,
+    presence) in one response. No pagination parameters are documented.
+limits:
+  announce.body: 8192 characters
+  announce.target: 256 characters
+  work.intent: 2048 characters
+  work.pathGlobs: 64 entries
+  announcement_delivery_freshness: 48 hours
+addressing:
+  field: target
+  resolution_order:
+  - live agent in your repo (exact landscape name including numeric suffix, e.g. alex-rivera-2)
+  - operator surface (admin)
+  - workspace member (matched on display name, GitHub login, or email)
+  unresolved: A name matching no live agent and no member is rejected; omit target to broadcast
+delivery_semantics:
+  guarantee: best-effort
+  detail: >-
+    Targeted agents see an announcement on their next work or sync, once. Humans see it in the dashboard
+    feed. Per-session mailboxes are paired by process ancestry so co-located agents cannot consume each
+    other's messages.
+error_envelope:
+  style: advisory text
+  note: >-
+    Shepherd does not use RFC 9457 problem+json. Successful coordination calls return small JSON results
+    ({"ok": true}, {"ok": true, "announcementId": n}) plus pending announcements; failure and no-op
+    conditions are returned as one-line human-readable advisories addressed to the agent rather than as
+    error codes. No error-code registry is published, so no errors/ artifact is emitted.
+degraded_mode:
+  hub_unreachable: >-
+    Shepherd reports that the session is proceeding uncoordinated instead of blocking work. link reports
+    the failure and changes nothing rather than erroring.
+versioning:
+  scheme: semver per published package
+  client_version_negotiation: >-
+    The hub advertises the latest published client version on join, with an optional MIN_CLIENT_VERSION
+    floor. Out-of-date clients get a one-line nudge appended to the first coordination tool result of a
+    session (once per session, ~24-hour per-machine cooldown); clients below the minimum are warned
+    every session.
+  public_contract: >-
+    The MCP tool surface and bin entries of @korso/shepherd are treated as a public contract; changes
+    ship as releases, not refactors.
+  deprecation_practice: >-
+    Deprecated input aliases are kept for older clients and documented as deprecated (announce accepts
+    targetAgentName and toAdmin as deprecated aliases for target).
+  detail: lifecycle/korso-lifecycle.yml
+repo_marker:
+  file: .shepherd
+  location: repo root
+  contents: 'the workspace slug only, e.g. { "workspace": "acme-corp" } - never a token'
+  committed: true
+  precedence: A committed marker always wins over a local decline
+rate_limits:
+  documented: false
+cross_references:
+  authentication: authentication/korso-authentication.yml
+  lifecycle: lifecycle/korso-lifecycle.yml
+  mcp: mcp/korso-mcp.yml
+  data_model: data-model/korso-data-model.yml

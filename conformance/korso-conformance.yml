@@ -1,0 +1,71 @@
+generated: '2026-07-19'
+method: searched
+source: https://korsoai.com/docs
+note: >-
+  Korso publishes no compliance program, certifications, or trust center (probed 2026-07-19: no
+  trust./security. subdomain, no /trust, /security, or /compliance page). This file therefore asserts
+  only the technical standards the Shepherd surface demonstrably conforms to, and no Compliance pointer
+  is emitted.
+standards:
+- id: model-context-protocol
+  conforms: true
+  evidence: >-
+    @korso/shepherd is a standard stdio MCP server launched as `npx -y @korso/shepherd`, documented for
+    Claude Code, Codex, Pi, and Cursor via the standard mcpServers configuration shape. It uses the MCP
+    initialize instructions field (the Pi workaround in 0.9.1 exists precisely because Pi discards it).
+- id: semver
+  conforms: true
+  evidence: Per-package semantic versions published to npm (@korso/shepherd 0.11.2, @korso/shepherd-ui 0.20.1).
+- id: keep-a-changelog
+  conforms: true
+  evidence: 'CHANGELOG.md states: "The format is based on Keep a Changelog." Entries use Added/Fixed sections with ISO dates.'
+- id: rfc9116-security-txt
+  conforms: false
+  evidence: https://korsoai.com/.well-known/security.txt returned 404 on 2026-07-19.
+- id: coordinated-vulnerability-disclosure
+  conforms: true
+  evidence: >-
+    SECURITY.md publishes private reporting channels (GitHub Security Advisories preferred,
+    security@korsoai.com), stated acknowledgement and assessment targets, scope, and reporter credit.
+- id: oauth2
+  conforms: false
+  evidence: >-
+    Shepherd uses opaque bearer tokens (shp_ account tokens, shared TEAM_TOKEN), not OAuth 2.0. Google
+    and GitHub are used for dashboard sign-in, not as a developer-facing OAuth surface.
+- id: oidc
+  conforms: false
+  evidence: https://korsoai.com/.well-known/openid-configuration returned 404 on 2026-07-19.
+- id: rfc9457-problem-details
+  conforms: false
+  evidence: >-
+    Tool failures and no-ops are returned as one-line human-readable advisories to the agent, not as
+    application/problem+json.
+- id: openapi
+  conforms: false
+  evidence: >-
+    No OpenAPI or Swagger document published. Probed korsoai.com/openapi.json, api.korsoai.com, and the
+    Shepherd repository root on 2026-07-19 - all absent. The wire contract is expressed as zod schemas
+    in the private @shepherd/shared package.
+- id: asyncapi
+  conforms: false
+  evidence: >-
+    No event or webhook surface published. Shepherd's "hooks" are local agent-client hooks (Claude Code,
+    Codex, Cursor, Pi), not HTTP webhooks.
+- id: rest
+  conforms: partial
+  evidence: >-
+    The hub is a Fastify HTTP service (a /join endpoint is referenced in the changelog), but it is an
+    internal transport between the MCP client and the hub rather than a documented public REST API.
+licensing:
+  id: AGPL-3.0-only
+  osi_approved: true
+  evidence: package.json license field on both published npm packages and the repository LICENSE file.
+compliance_program:
+  published: false
+  certifications: []
+  probed:
+  - https://trust.korsoai.com/
+  - https://security.korsoai.com/
+  - https://korsoai.com/trust
+  - https://korsoai.com/security
+  - https://korsoai.com/compliance

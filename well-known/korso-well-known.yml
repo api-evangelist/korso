@@ -1,0 +1,39 @@
+generated: '2026-07-19'
+method: searched
+source: live probes of the korsoai.com well-known surface
+host: https://korsoai.com
+result: none
+note: >-
+  No .well-known documents are published. Recorded as an honest negative probe result - no WellKnown or
+  SecurityTxt pointer is emitted in apis.yml, and no raw files were saved. Korso's vulnerability
+  disclosure policy is published as SECURITY.md in the Shepherd repository instead; see
+  security/korso-vulnerability-disclosure.yml.
+hosts_probed:
+- host: https://korsoai.com
+  reachable: true
+- host: https://api.korsoai.com
+  reachable: false
+  detail: HTTP 404 at the root; no documented public API host.
+- host: https://docs.korsoai.com
+  reachable: false
+  detail: no DNS resolution; documentation is served from korsoai.com/docs.
+documents:
+- path: /.well-known/security.txt
+  status: 404
+- path: /.well-known/openid-configuration
+  status: 404
+- path: /.well-known/oauth-authorization-server
+  status: 404
+- path: /.well-known/api-catalog
+  status: 404
+- path: /.well-known/ai-plugin.json
+  status: 404
+other_probes:
+- path: /llms.txt
+  status: 404
+- path: /openapi.json
+  status: 404
+caveat: >-
+  korsoai.com is a single-page app whose catch-all returns HTTP 200 with a "Sign in - Korso Console"
+  shell for any unknown path. Status codes above are genuine 404s; elsewhere in this repo a bare 200 was
+  not treated as evidence that a page exists without checking its title.

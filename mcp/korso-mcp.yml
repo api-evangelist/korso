@@ -1,0 +1,169 @@
+generated: '2026-07-19'
+method: searched
+source: https://korsoai.com/docs
+status: published
+server:
+  name: shepherd
+  package: '@korso/shepherd'
+  registry: npm
+  version: 0.11.2
+  transport: stdio
+  command: npx
+  args:
+  - -y
+  - '@korso/shepherd'
+  bin:
+  - shepherd-mcp
+  - shepherd-inbox-hook
+  license: AGPL-3.0-only
+  source_code: https://github.com/Korso-AI/Shepherd
+  docs: https://korsoai.com/docs
+  description: >-
+    Shepherd is a coordination layer for AI coding agents. The MCP server is a thin stdio client that
+    forwards agent tool calls to a Shepherd hub (Fastify + Postgres), letting a fleet of agents across
+    sessions, worktrees, and team members claim work, release claims, message each other, and read a
+    shared workspace landscape without producing merge conflicts.
+configuration:
+  environment:
+  - name: HUB_URL
+    required: true
+    description: Base URL of the Shepherd hub the MCP server forwards to.
+  - name: SHEPHERD_TOKEN
+    required: conditional
+    description: >-
+      Account-scoped bearer token for a Korso-hosted hub, generated from the dashboard Connect Agent
+      panel. Works across every workspace the account belongs to. Wins if TEAM_TOKEN is also set.
+  - name: TEAM_TOKEN
+    required: conditional
+    description: Shared workspace-wide secret for a self-hosted hub.
+  - name: WORKSPACE
+    required: false
+    description: >-
+      Self-host only; must match the hub's configured workspace. Ignored on the hosted path because
+      SHEPHERD_TOKEN already carries the account's workspace memberships.
+  - name: PROGRAM
+    required: false
+    description: Identifies the calling client (codex, pi, cursor) for hook installation.
+  note: >-
+    The server requires at least one of SHEPHERD_TOKEN or TEAM_TOKEN at startup and fails immediately
+    with a clear error without one.
+  clients:
+  - name: Claude Code
+    install: claude mcp add shepherd -s user -e HUB_URL=<hub> -e SHEPHERD_TOKEN=<token> -- npx -y '@korso/shepherd'
+    alternative: project-root .mcp.json
+    note: Claude Code does not read ~/.claude/mcp.json.
+  - name: Codex
+    install: codex mcp add shepherd --env HUB_URL=<hub> --env SHEPHERD_TOKEN=<token> --env PROGRAM=codex -- npx -y '@korso/shepherd'
+    alternative: ~/.codex/config.toml [mcp_servers.shepherd]
+  - name: Pi
+    config_paths:
+    - ~/.pi/agent/mcp.json
+    - .pi/mcp.json
+  - name: Cursor
+    config_paths:
+    - ~/.cursor/mcp.json
+    - .cursor/mcp.json
+  prerequisites:
+  - Node.js 20 or newer
+  - An MCP-capable client able to launch a stdio MCP server
+tools:
+- name: work
+  category: coordination
+  description: Claim the files or task area an agent is about to work on.
+  docs: https://korsoai.com/docs/mcp-tools/work
+  gated_on_session: true
+  inputs:
+  - name: intent
+    type: string
+    required: true
+    description: A short description of the work. Maximum 2048 characters.
+  - name: pathGlobs
+    type: string[]
+    required: true
+    description: Files, folders, or glob-like areas affected by the work. Maximum 64 entries.
+  - name: ttlSeconds
+    type: integer
+    required: false
+    description: Claim lifetime in seconds. Server default applies if omitted.
+  returns: A workItemId plus the current workspace landscape.
+- name: done
+  category: coordination
+  description: Release a Shepherd work claim.
+  docs: https://korsoai.com/docs/mcp-tools/done
+  gated_on_session: true
+  inputs:
+  - name: workItemId
+    type: string (UUID)
+    required: true
+    description: The claim id returned by work.
+  returns: '{ "ok": true } plus any pending announcements for the agent.'
+- name: announce
+  category: coordination
+  description: Send a workspace announcement or direct message to another agent.
+  docs: https://korsoai.com/docs/mcp-tools/announce
+  gated_on_session: true
+  inputs:
+  - name: body
+    type: string
+    required: true
+    description: Message body. Maximum 8192 characters.
+  - name: target
+    type: string or null
+    required: false
+    description: >-
+      Omit or null to broadcast to all agents. To direct the message pass one name (max 256 chars): a
+      live agent's exact landscape name (including numeric suffix), a human workspace member's name, or
+      "admin". Resolved in order: live agent in your repo, operator surface (admin), workspace member
+      (matched on display name, GitHub login, or email).
+  deprecated_inputs:
+  - targetAgentName
+  - toAdmin
+  returns: '{ "ok": true, "announcementId": number } plus pending inbound announcements for the sender.'
+- name: sync
+  category: coordination
+  description: Refresh the current Shepherd workspace landscape.
+  docs: https://korsoai.com/docs/mcp-tools/sync
+  gated_on_session: true
+  inputs: []
+  returns: >-
+    The current workspace landscape: active claims, your own active claims, recent announcements, and
+    presence information. Also refreshes presence and renews active claims without creating a new one.
+- name: link
+  category: repo-lifecycle
+  description: Opt this repository into Shepherd coordination.
+  docs: https://korsoai.com/docs/mcp-tools/link
+  gated_on_session: false
+  inputs:
+  - name: workspace
+    type: string
+    required: false
+    description: The workspace slug to link this repo to. Omit to auto-pick or list choices.
+  returns: A one-line advisory or confirmation.
+  side_effects: >-
+    Writes a committed .shepherd marker file at the repo root containing only the workspace slug, never
+    a token. Clears any prior decline. Takes effect immediately, no restart required.
+- name: unlink
+  category: repo-lifecycle
+  description: Opt this repository out of Shepherd coordination.
+  docs: https://korsoai.com/docs/mcp-tools/unlink
+  gated_on_session: false
+  inputs: []
+  returns: A one-line advisory.
+  side_effects: >-
+    Removes the committed .shepherd marker, records a local decline automatically, and tears down any
+    active coordination session immediately.
+- name: decline
+  category: repo-lifecycle
+  description: Opt out of Shepherd coordination for this repo without linking.
+  docs: https://korsoai.com/docs/mcp-tools/decline
+  gated_on_session: false
+  inputs: []
+  returns: A one-line advisory confirming the repo stays uncoordinated.
+  side_effects: >-
+    Local-only and never committed, so a teammate in the same repo can still link it. A committed marker
+    always wins over a local decline.
+notes:
+- The MCP server tool surface and bin entries are treated as a public contract; changes ship as releases.
+- If the hub is unreachable, Shepherd reports that the session is proceeding uncoordinated rather than
+  blocking work.
+- Announcement delivery is best-effort; targeted agents see messages on their next work/sync, once.
