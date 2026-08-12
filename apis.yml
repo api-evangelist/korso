@@ -43,6 +43,10 @@ tags:
 - Y Combinator
 apis: []
 common:
+- type: IssueTracker
+  url: https://github.com/Korso-AI/Shepherd/issues
+- type: ContributionGuide
+  url: https://github.com/Korso-AI/Shepherd/blob/main/CONTRIBUTING.md
 - type: MCPServer
   name: Shepherd MCP server
   url: mcp/korso-mcp.yml
