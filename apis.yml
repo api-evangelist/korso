@@ -9,6 +9,18 @@ description: 'Korso is a Los Angeles based company (Y Combinator Spring 2026) bu
   producing merge conflicts and overwriting each other. The MCP surface exposes seven documented tools
   (work, done, announce, sync, link, unlink, decline). Korso also runs a beta Trading API over its own
   quantitative trading desk and Korso Research, an AI-native research workspace.'
+deliveryModel:
+  model: unknown
+  open_source: unknown
+  commercial: true
+  callable_host: false
+  label: Delivery model not determined — needs a product licence on record
+  confidence: low
+  source:
+  - pricing
+  - repository-unlicensed
+  generated: '2026-08-28'
+  method: derived
 accessModel:
   pricing: unknown
   onboarding: self-serve
